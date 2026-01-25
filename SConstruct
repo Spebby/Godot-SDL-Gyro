@@ -1,8 +1,30 @@
 #!/usr/bin/env python
 import os
 import sys
+import subprocess
 
 env = SConscript("godot-cpp/SConstruct")
+
+
+def pkg_config_flags(package):
+    cflags = (
+        subprocess.check_output(["pkg-config", "--cflags", package], text=True)
+        .strip()
+        .split()
+    )
+    libs = (
+        subprocess.check_output(["pkg-config", "--libs", package], text=True)
+        .strip()
+        .split()
+    )
+    return cflags, libs
+
+
+if env["platform"] == "linux":
+    cflags, libs = pkg_config_flags("sdl2")
+    env.Append(CPPFLAGS=cflags)
+    env.Append(LINKFLAGS=libs)
+
 # For reference:
 # - CCFLAGS are compilation flags shared between C and C++
 # - CFLAGS are for C-specific compilation flags
@@ -12,15 +34,15 @@ env = SConscript("godot-cpp/SConstruct")
 # - LINKFLAGS are for linking flags
 # tweak this if you want to use different folders, or more folders, to store your source code in.
 
-env.Append(CPPPATH=["libs/mingw_dev_lib/include"],LIBS='SDL2')
+env.Append(CPPPATH=["libs/mingw_dev_lib/include"], LIBS="SDL2")
 sources = Glob("src/*.cpp")
 
-if env["platform"] == "windows" and (env["use_mingw"]==True):
-    env.Append(CPPPATH=['libs/mingw_dev_lib/include'])
-    env.Append(LIBPATH=['libs/mingw_dev_lib/lib'])
+if env["platform"] == "windows" and (env["use_mingw"] == True):
+    env.Append(CPPPATH=["libs/mingw_dev_lib/include"])
+    env.Append(LIBPATH=["libs/mingw_dev_lib/lib"])
 
-    env.Append(LINKFLAGS=["-Wl,--dynamicbase","-Wl,--nxcompat"])
-    env.Append(CXXFLAGS =["-mwindows"])
+    env.Append(LINKFLAGS=["-Wl,--dynamicbase", "-Wl,--nxcompat"])
+    env.Append(CXXFLAGS=["-mwindows"])
     env.Append(
         LIBS=[
             "SDL2",
@@ -38,11 +60,11 @@ if env["platform"] == "windows" and (env["use_mingw"]==True):
             "uuid",
             "m",
             "oleaut32",
-            "shell32"
+            "shell32",
         ]
     )
 
-elif env['CC'] == 'cl':
+elif env["CC"] == "cl":
     env.Append(
         LIBS=[
             "SDL2",
@@ -59,7 +81,9 @@ if env["platform"] == "macos":
     )
 else:
     library = env.SharedLibrary(
-        "Godot_Gamepad_SDLTest/addons/godot-sdl-gyro/sdlgyro{}{}".format(env["suffix"], env["SHLIBSUFFIX"]),
+        "Godot_Gamepad_SDLTest/addons/godot-sdl-gyro/sdlgyro{}{}".format(
+            env["suffix"], env["SHLIBSUFFIX"]
+        ),
         source=sources,
     )
 
