@@ -7,70 +7,75 @@ env = SConscript("godot-cpp/SConstruct")
 
 
 def pkg_config_flags(package):
-    cflags = (
-        subprocess.check_output(["pkg-config", "--cflags", package], text=True)
-        .strip()
-        .split()
-    )
-    libs = (
-        subprocess.check_output(["pkg-config", "--libs", package], text=True)
-        .strip()
-        .split()
-    )
-    return cflags, libs
+    try:
+        cflags = (
+            subprocess.check_output(["pkg-config", "--cflags", package], text=True)
+            .strip()
+            .split()
+        )
+        libs = (
+            subprocess.check_output(["pkg-config", "--libs", package], text=True)
+            .strip()
+            .split()
+        )
+        return cflags, libs
+    except subprocess.CalledProcessError:
+        print(f"Warning: pkg-config failed for {package}")
+        return [], []
 
 
-if env["platform"] == "linux":
-    cflags, libs = pkg_config_flags("sdl2")
-    env.Append(CPPFLAGS=cflags)
-    env.Append(LINKFLAGS=libs)
+def parse_libs_to_scons(libs_output):
+    """Parse pkg-config --libs output into SCons LIBS and LIBPATH"""
+    libs = []
+    libpaths = []
+    other_flags = []
+    
+    for flag in libs_output:
+        if flag.startswith("-l"):
+            libs.append(flag[2:])  # Remove -l prefix
+        elif flag.startswith("-L"):
+            libpaths.append(flag[2:])  # Remove -L prefix
+        else:
+            other_flags.append(flag)
+    
+    return libs, libpaths, other_flags
 
-# For reference:
-# - CCFLAGS are compilation flags shared between C and C++
-# - CFLAGS are for C-specific compilation flags
-# - CXXFLAGS are for C++-specific compilation flags
-# - CPPFLAGS are for pre-processor flags
-# - CPPDEFINES are for pre-processor defines
-# - LINKFLAGS are for linking flags
-# tweak this if you want to use different folders, or more folders, to store your source code in.
 
-env.Append(CPPPATH=["libs/mingw_dev_lib/include"], LIBS="SDL2")
+# Use pkg-config for SDL2 on all platforms
+if env["platform"] in ["linux", "windows"]:
+    cflags, libs_flags = pkg_config_flags("sdl2")
+    
+    if cflags:
+        env.Append(CCFLAGS=cflags)
+    
+    if libs_flags:
+        libs, libpaths, other_flags = parse_libs_to_scons(libs_flags)
+        env.Append(LIBS=libs)
+        env.Append(LIBPATH=libpaths)
+        if other_flags:
+            env.Append(LINKFLAGS=other_flags)
+    else:
+        # Fallback if pkg-config isn't available
+        print("Warning: pkg-config not found, using fallback SDL2 linking")
+        env.Append(LIBS=["SDL2"])
+
 sources = Glob("src/*.cpp")
 
-if env["platform"] == "windows" and (env["use_mingw"] == True):
-    env.Append(CPPPATH=["libs/mingw_dev_lib/include"])
-    env.Append(LIBPATH=["libs/mingw_dev_lib/lib"])
-
-    env.Append(LINKFLAGS=["-Wl,--dynamicbase", "-Wl,--nxcompat"])
-    env.Append(CXXFLAGS=["-mwindows"])
-    env.Append(
-        LIBS=[
-            "SDL2",
-            "SDL2main",
-            "setupapi",
-            "winmm",
-            "user32",
-            "gdi32",
-            "dinput8",
-            "dxguid",
-            "dxerr8",
-            "imm32",
-            "ole32",
-            "version",
-            "uuid",
-            "m",
-            "oleaut32",
-            "shell32",
-        ]
-    )
-
-elif env["CC"] == "cl":
-    env.Append(
-        LIBS=[
-            "SDL2",
-            "SDL2main",
-        ]
-    )
+# Windows-specific flags and system libraries
+if env["platform"] == "windows":
+    if env.get("use_mingw", False):
+        env.Append(LINKFLAGS=["-Wl,--dynamicbase", "-Wl,--nxcompat"])
+    
+    # Add Windows system libraries that SDL2 depends on
+    env.Append(LIBS=[
+        "setupapi",
+        "winmm",
+        "imm32",
+        "version",
+        "ole32",
+        "oleaut32",
+        "cfgmgr32",
+    ])
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(

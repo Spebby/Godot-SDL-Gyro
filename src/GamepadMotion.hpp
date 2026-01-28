@@ -4,9 +4,14 @@
 
 #pragma once
 
+
 #define _USE_MATH_DEFINES
-#include <math.h>
+#include <cmath>
 #include <algorithm> // std::min, std::max and std::clamp
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 // You don't need to look at these. These will just be used internally by the GamepadMotion class declared below.
 // You can ignore anything in namespace GamepadMotionHelpers.

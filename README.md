@@ -56,15 +56,30 @@ call any of the folloing functions in the process fuction
 
 ### Windows
 
-[Download SDL2-devel-X.XX.X-mingw.zip](https://github.com/libsdl-org/SDL/releases/latest)
-extract and place the contetns of SDL2-X.XX.X\x86_64-w64-mingw32 in here ->
-libs/mingw_dev_lib (you could change that location in the SConstruct file)  
-then:
+As SDL2 is no longer in development, and SDL2-compat doesn't have a mingw branch, you're gonna have to get creative, if you don't want to start digging through old builds. I recommend using the MSYS2 MINGW64 shell, and installing all dependencies. Once in the terminal, run...
+
+```
+pacman -Syu
+pacman -S --needed base-devel mingw-w64-x86_64-toolchain
+pacman -S mingw-w64-x86_64-python
+pacman -S mingw-w64-x86_64-scons
+pacman -S mingw-w64-x86_64-SDL2
+```
+
+There are 6 supported platforms...
+```
+linux, macos, windows, android, ios, web
+```
+
+There are 3 potential build targets...
+```
+template_release, template_debug editor
+```
 
 ```
 git clone https://github.com/SagaPDev/Godot-SDL-Gamepad-Test.git
 cd Godot-SDL-Gamepad-Test
-scons use_mingw=yes
+scons platform=windows target=<platform>
 ```
 
 ### Linux
@@ -72,7 +87,7 @@ scons use_mingw=yes
 ```
 git clone https://github.com/SagaPDev/Godot-SDL-Gamepad-Test.git
 cd Godot-SDL-Gamepad-Test
-scons platform=linux target=<platform> bits=64
+scons platform=linux target=<platform>
 ```
 
 ## TO DO
