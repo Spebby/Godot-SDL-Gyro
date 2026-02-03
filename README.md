@@ -18,7 +18,7 @@ Download the latest build from
 [Here](https://github.com/SagaPDev/Godot-SDL-Gyro/releases/latest/download/godot-sdl-gyro-addon.zip),
 extract the `addons` folder and place it in the root of your project
 
-in your GDscript make a new SDLGyro object
+In your GDscript make a new SDLGyro object
 
 ```
 ...
@@ -26,7 +26,7 @@ var Gyro=SDLGyro.new()
 ...
 ```
 
-initialize SDL and The controller ready function
+Initialise SDL and The controller ready function
 
 ```
 ...
@@ -36,7 +36,7 @@ func _ready():
 ...
 ```
 
-call any of the folloing functions in the process fuction
+Call any of the following functions in the process function.
 
 ```
       gamepad_polling()            //returns controller orientation(this function needs to be called so that the others can work)
@@ -54,9 +54,19 @@ call any of the folloing functions in the process fuction
 
 ## Build Instructions
 
+For all builds, make sure you have `SDL2` or any other compatible SDL library
+installed on your system. For MacOS this is as simple as `brew install sdl2`. If
+you're using Linux, I trust you can figure it out :) Windows has more specific
+instructions because it's a pain.
+
+Make sure you also have `pkg-config` and `scons` installed.
+
 ### Windows
 
-As SDL2 is no longer in development, and SDL2-compat doesn't have a mingw branch, you're gonna have to get creative, if you don't want to start digging through old builds. I recommend using the MSYS2 MINGW64 shell, and installing all dependencies. Once in the terminal, run...
+As SDL2 is no longer in development, and SDL2-compat doesn't have a mingw
+branch, you're gonna have to get creative, if you don't want to start digging
+through old builds. I recommend using the MSYS2 MINGW64 shell, and installing
+all dependencies. Once in the terminal, run...
 
 ```
 pacman -Syu
@@ -67,11 +77,13 @@ pacman -S mingw-w64-x86_64-SDL2
 ```
 
 There are 6 supported platforms...
+
 ```
 linux, macos, windows, android, ios, web
 ```
 
 There are 3 potential build targets...
+
 ```
 template_release, template_debug editor
 ```
@@ -79,6 +91,7 @@ template_release, template_debug editor
 ```
 git clone https://github.com/SagaPDev/Godot-SDL-Gamepad-Test.git
 cd Godot-SDL-Gamepad-Test
+git submodule update --init --recursive
 scons platform=windows target=<platform>
 ```
 
@@ -87,7 +100,26 @@ scons platform=windows target=<platform>
 ```
 git clone https://github.com/SagaPDev/Godot-SDL-Gamepad-Test.git
 cd Godot-SDL-Gamepad-Test
+git submodule update --init --recursive
 scons platform=linux target=<platform>
+```
+
+### MacOS
+
+MacOS's build is complicated by there being multiple popular architectures. I
+only bothered to build for `arm64`, but nothing is stopping you from building
+something else. Make sure you have an SDL2 package which supports the
+architecture you're linking for.
+
+```
+arm64, x86_64, universal
+```
+
+```
+git clone https://github.com/SagaPDev/Godot-SDL-Gamepad-Test.git
+cd Godot-SDL-Gamepad-Test
+git submodule update --init --recursive
+scons platform=linux target=<platform> arch=<arch>
 ```
 
 ## TO DO

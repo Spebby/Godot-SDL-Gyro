@@ -29,7 +29,7 @@ def parse_libs_to_scons(libs_output):
     libs = []
     libpaths = []
     other_flags = []
-    
+
     for flag in libs_output:
         if flag.startswith("-l"):
             libs.append(flag[2:])  # Remove -l prefix
@@ -37,17 +37,17 @@ def parse_libs_to_scons(libs_output):
             libpaths.append(flag[2:])  # Remove -L prefix
         else:
             other_flags.append(flag)
-    
+
     return libs, libpaths, other_flags
 
 
 # Use pkg-config for SDL2 on all platforms
-if env["platform"] in ["linux", "windows"]:
+if env["platform"] in ["linux", "windows", "macos"]:
     cflags, libs_flags = pkg_config_flags("sdl2")
-    
+
     if cflags:
         env.Append(CCFLAGS=cflags)
-    
+
     if libs_flags:
         libs, libpaths, other_flags = parse_libs_to_scons(libs_flags)
         env.Append(LIBS=libs)
@@ -65,17 +65,19 @@ sources = Glob("src/*.cpp")
 if env["platform"] == "windows":
     if env.get("use_mingw", False):
         env.Append(LINKFLAGS=["-Wl,--dynamicbase", "-Wl,--nxcompat"])
-    
+
     # Add Windows system libraries that SDL2 depends on
-    env.Append(LIBS=[
-        "setupapi",
-        "winmm",
-        "imm32",
-        "version",
-        "ole32",
-        "oleaut32",
-        "cfgmgr32",
-    ])
+    env.Append(
+        LIBS=[
+            "setupapi",
+            "winmm",
+            "imm32",
+            "version",
+            "ole32",
+            "oleaut32",
+            "cfgmgr32",
+        ]
+    )
 
 if env["platform"] == "macos":
     library = env.SharedLibrary(
