@@ -5,6 +5,11 @@ SDL and JibbSmart
 [GamepadMotionHelpers](https://github.com/JibbSmart/GamepadMotionHelpers)
 libraries
 
+## NOTICE
+
+This repository will likely be irrelevant in future Godot versions, as Godot 4.7 will include some levevl of gyro support.
+https://docs.godotengine.org/en/latest/tutorials/inputs/controller_features.html#motion-sensors-gyroscope-and-accelerometer
+
 ## Why this fork exists
 
 For my own purposes, I need to build the library "templates". I run a silly
